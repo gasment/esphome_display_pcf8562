@@ -163,7 +163,8 @@ bool PCF8562Display::initialize_() {
       0xF0,
       static_cast<uint8_t>(0x60 | this->hardware_subaddress_),
   };
-  ESP_LOGD(TAG, "Init commands: %s", format_hex_pretty(commands, sizeof(commands)).c_str());
+  char hex_buf[format_hex_pretty_size(sizeof(commands))];
+  ESP_LOGD(TAG, "Init commands: %s", format_hex_pretty_to(hex_buf, commands, sizeof(commands)));
   return this->write_data_(commands, sizeof(commands));
 }
 
@@ -181,8 +182,9 @@ bool PCF8562Display::flush() {
   packet[0] = 0xE0 | this->hardware_subaddress_;  // Device-select, C=1.
   packet[1] = 0x00;                            // Load-data-pointer=0, C=0.
   std::copy(this->buffer_.begin(), this->buffer_.end(), packet + 2);
+  char hex_buf[format_hex_pretty_size(sizeof(packet))];
   ESP_LOGV(TAG, "Frame TX (device select, RAM pointer, 16 RAM bytes): %s",
-           format_hex_pretty(packet, sizeof(packet)).c_str());
+           format_hex_pretty_to(hex_buf, packet, sizeof(packet)));
   if (!this->write_data_(packet, sizeof(packet))) {
     return false;
   }
